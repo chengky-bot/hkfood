@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>香港美食知多少 - 趣味學習遊戲</title>
+    <title>香港小學堂 - 趣味學習遊戲</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -21,27 +21,17 @@
     <!-- Lucide Icons (Vanilla JS version) -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Google Fonts: Noto Sans TC Rounded (Simulated via Noto Sans + CSS) -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #FFF8E7; /* 溫暖的米黃色背景 */
+            background-color: #FFF8E7;
             overflow-x: hidden;
-            touch-action: manipulation; /* 優化觸控 */
-        }
-
-        /* 模擬圓體效果 */
-        .font-rounded {
-            font-family: 'Noto Sans TC', sans-serif;
-        }
-        
-        /* 全息色按鈕動畫 */
-        @keyframes holographic {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .holographic-btn {
@@ -53,22 +43,18 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        /* 玻璃擬態 */
+        @keyframes holographic {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.5);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-        }
-
-        /* 隱藏滾動條但保持功能 */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
         }
     </style>
 </head>
@@ -77,61 +63,53 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
+        const { useState, useEffect, useRef, useCallback } = React;
         const { motion, AnimatePresence } = window.Motion;
 
-        // --- FIXED: Lucide Icon Component for Browser Environment ---
-        // 直接從 lucide 全局變量獲取圖標定義，並轉換為 React 組件
+        // --- Lucide Icon Component ---
         const LucideIcon = ({ name, size = 24, className, ...props }) => {
             const iconData = lucide.icons[name];
-            if (!iconData) {
-                console.warn(`Icon ${name} not found`);
-                return null;
-            }
-
+            if (!iconData) return null;
             return (
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={size}
-                    height={size}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={className}
-                    {...props}
-                >
-                    {iconData.map(([tag, attrs], index) => (
-                        React.createElement(tag, { ...attrs, key: index })
-                    ))}
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+                    {iconData.map(([tag, attrs], index) => React.createElement(tag, { ...attrs, key: index }))}
                 </svg>
             );
         };
 
-        // 定義所有用到的圖標組件
-        const Settings = (props) => <LucideIcon name="Settings" {...props} />;
-        const Volume2 = (props) => <LucideIcon name="Volume2" {...props} />;
-        const VolumeX = (props) => <LucideIcon name="VolumeX" {...props} />;
-        const Home = (props) => <LucideIcon name="Home" {...props} />;
-        const Star = (props) => <LucideIcon name="Star" {...props} />;
-        const ArrowRight = (props) => <LucideIcon name="ArrowRight" {...props} />;
-        const RefreshCcw = (props) => <LucideIcon name="RefreshCcw" {...props} />;
-        const CheckCircle = (props) => <LucideIcon name="CheckCircle" {...props} />;
-        const XCircle = (props) => <LucideIcon name="XCircle" {...props} />;
-        const Trophy = (props) => <LucideIcon name="Trophy" {...props} />;
-        const Heart = (props) => <LucideIcon name="Heart" {...props} />;
-        const Brain = (props) => <LucideIcon name="Brain" {...props} />;
-        const Lightbulb = (props) => <LucideIcon name="Lightbulb" {...props} />;
-        const ChefHat = (props) => <LucideIcon name="ChefHat" {...props} />;
-        const Monitor = (props) => <LucideIcon name="Monitor" {...props} />;
+        const Settings = (p) => <LucideIcon name="Settings" {...p} />;
+        const Volume2 = (p) => <LucideIcon name="Volume2" {...p} />;
+        const VolumeX = (p) => <LucideIcon name="VolumeX" {...p} />;
+        const Home = (p) => <LucideIcon name="Home" {...p} />;
+        const Star = (p) => <LucideIcon name="Star" {...p} />;
+        const ArrowRight = (p) => <LucideIcon name="ArrowRight" {...p} />;
+        const RefreshCcw = (p) => <LucideIcon name="RefreshCcw" {...p} />;
+        const CheckCircle = (p) => <LucideIcon name="CheckCircle" {...p} />;
+        const XCircle = (p) => <LucideIcon name="XCircle" {...p} />;
+        const Trophy = (p) => <LucideIcon name="Trophy" {...p} />;
+        const Heart = (p) => <LucideIcon name="Heart" {...p} />;
+        const Brain = (p) => <LucideIcon name="Brain" {...p} />;
+        const Lightbulb = (p) => <LucideIcon name="Lightbulb" {...p} />;
+        const Monitor = (p) => <LucideIcon name="Monitor" {...p} />;
+        const Shuffle = (p) => <LucideIcon name="Shuffle" {...p} />;
+        const Utensils = (p) => <LucideIcon name="Utensils" {...p} />;
+        const Calculator = (p) => <LucideIcon name="Calculator" {...p} />;
+        const Eraser = (p) => <LucideIcon name="Eraser" {...p} />;
+        const BookOpen = (p) => <LucideIcon name="BookOpen" {...p} />;
 
-        // --- 0. 數據庫 (Data) ---
+        // --- 0. 數據庫與常數 ---
         
-        const FOOD_EMOJIS = ['🥚', '🍡', '🧋', '🍞', '🥟', '🍜']; // 蛋撻, 魚蛋, 奶茶, 麵包, 點心, 麵
+        const FOOD_TYPES = ['🥚', '🍡', '🧋', '🍞', '🥟', '🍜']; 
+        const ROWS = 6;
+        const COLS = 6;
         
-        const QUESTION_DB = {
+        const SUBJECTS = [
+            { id: 'humanities', name: '人文科：香港美食', icon: <Utensils size={32}/>, color: 'bg-orange-400' },
+            { id: 'math', name: '數學科：個位加法', icon: <Calculator size={32}/>, color: 'bg-blue-400' }
+        ];
+
+        // 人文科題庫
+        const FOOD_QUESTIONS = {
             beginner: [
                 { id: 1, type: 'visual', q: "這是一種很受歡迎的下午茶點心，外皮酥酥的，它是什麼？", img: "🥚", options: [{t:"雞蛋仔", c:false}, {t:"蛋撻", c:true}, {t:"菠蘿包", c:false}], hint: "它是黃色的，圓圓的，像一個小盤子。", fact: "蛋撻是香港最具代表性的點心之一，要趁熱吃喔！" },
                 { id: 2, type: 'visual', q: "我們在街邊小食店常看到這個，通常用竹籤串起來吃：", img: "🍡", options: [{t:"燒賣", c:false}, {t:"咖喱魚蛋", c:true}, {t:"牛丸", c:false}], hint: "它是金黃色的，圓滾滾的。", fact: "咖喱魚蛋微辣彈牙，是放學後的最愛！" },
@@ -147,87 +125,132 @@
             ]
         };
 
-        // --- 1. 工具函式 (Utils) ---
+        // 數學科題目產生器
+        const generateMathQuestion = (level) => {
+            const n1 = Math.floor(Math.random() * 9) + 1; // 1-9
+            const n2 = Math.floor(Math.random() * 9) + 1; // 1-9
+            const ans = n1 + n2;
+            const qText = `${n1} + ${n2} = ?`;
+
+            // 高階：輸入題
+            if (level === 'advanced') {
+                return {
+                    id: `math-${Date.now()}`,
+                    subject: 'math',
+                    type: 'input', // 標記為輸入題
+                    q: qText,
+                    img: '🧮',
+                    answer: ans.toString(),
+                    hint: `試著用手指數數看：${n1} 加上 ${n2}`,
+                    fact: `太棒了！${n1} 加 ${n2} 等於 ${ans}。數學真有趣！`
+                };
+            } 
+            // 初階/中階：選擇題
+            else {
+                let opts = [ans];
+                while(opts.length < 3) {
+                    // 生成干擾項 (答案 +/- 1~3)
+                    let r = ans + Math.floor(Math.random() * 7) - 3; 
+                    if (r > 0 && !opts.includes(r)) opts.push(r);
+                }
+                // 打亂選項
+                const options = opts.sort(() => Math.random() - 0.5).map(v => ({
+                    t: v.toString(),
+                    c: v === ans
+                }));
+
+                return {
+                    id: `math-${Date.now()}`,
+                    subject: 'math',
+                    type: 'choice',
+                    q: qText,
+                    img: '🔢',
+                    options: options,
+                    hint: `把 ${n1} 和 ${n2} 合起來數一數。`,
+                    fact: `答對了！${n1} + ${n2} = ${ans}`
+                };
+            }
+        };
+
+        // --- 1. 工具函式 (Grid Logic) ---
+
+        const createItem = (type) => ({ id: Math.random().toString(36).substr(2, 9), type });
+
+        const generateGrid = () => {
+            const grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(null));
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    let type;
+                    do {
+                        type = FOOD_TYPES[Math.floor(Math.random() * FOOD_TYPES.length)];
+                    } while (
+                        (c >= 2 && grid[r][c-1].type === type && grid[r][c-2].type === type) ||
+                        (r >= 2 && grid[r-1][c].type === type && grid[r-2][c].type === type)
+                    );
+                    grid[r][c] = createItem(type);
+                }
+            }
+            return grid;
+        };
+
+        const findMatches = (grid) => {
+            const matches = new Set();
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS - 2; c++) {
+                    const t1 = grid[r][c], t2 = grid[r][c+1], t3 = grid[r][c+2];
+                    if (t1 && t2 && t3 && t1.type === t2.type && t2.type === t3.type) {
+                        matches.add(`${r},${c}`); matches.add(`${r},${c+1}`); matches.add(`${r},${c+2}`);
+                    }
+                }
+            }
+            for (let c = 0; c < COLS; c++) {
+                for (let r = 0; r < ROWS - 2; r++) {
+                    const t1 = grid[r][c], t2 = grid[r+1][c], t3 = grid[r+2][c];
+                    if (t1 && t2 && t3 && t1.type === t2.type && t2.type === t3.type) {
+                        matches.add(`${r},${c}`); matches.add(`${r+1},${c}`); matches.add(`${r+2},${c}`);
+                    }
+                }
+            }
+            return matches;
+        };
 
         const speak = (text, rate = 1.0, enabled = true) => {
             if (!enabled || !window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'zh-HK'; // 優先嘗試粵語
+            utterance.lang = 'zh-HK';
             utterance.rate = rate;
-            
-            // 嘗試尋找中文語音
             const voices = window.speechSynthesis.getVoices();
             const hkVoice = voices.find(v => v.lang === 'zh-HK');
             if (hkVoice) utterance.voice = hkVoice;
-            
             window.speechSynthesis.speak(utterance);
         };
 
         // --- 2. 組件 (Components) ---
 
-        // 2.1 偏好設定模組
         const Preferences = ({ config, setConfig, isOpen, setIsOpen }) => {
             return (
                 <div className="fixed top-4 right-4 z-50">
-                    <button 
-                        onClick={() => setIsOpen(!isOpen)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-2xl shadow-lg transition-all transform hover:scale-105"
-                        aria-label="打開設定"
-                    >
+                    <button onClick={() => setIsOpen(!isOpen)} className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-2xl shadow-lg transition-all transform hover:scale-105">
                         {isOpen ? <XCircle size={24} /> : <Settings size={24} />}
                     </button>
-
                     <AnimatePresence>
                         {isOpen && (
-                            <motion.div 
-                                initial={{ x: 300, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                exit={{ x: 300, opacity: 0 }}
-                                className="absolute top-16 right-0 w-72 glass-panel rounded-3xl p-6 shadow-2xl"
-                            >
-                                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                    <Settings size={20} /> 偏好設定
-                                </h3>
-
-                                {/* 字體大小設定 */}
+                            <motion.div initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 300, opacity: 0 }} className="absolute top-16 right-0 w-72 glass-panel rounded-3xl p-6 shadow-2xl">
+                                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><Settings size={20} /> 偏好設定</h3>
                                 <div className="mb-6">
                                     <label className="block text-gray-600 mb-2 font-medium">字體大小</label>
-                                    <input 
-                                        type="range" min="14" max="32" step="2"
-                                        value={config.fontSize}
-                                        onChange={(e) => setConfig({...config, fontSize: parseInt(e.target.value)})}
-                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                                    />
-                                    <div className="flex justify-between text-xs text-gray-400 mt-1">
-                                        <span>小</span>
-                                        <span>中</span>
-                                        <span>大</span>
-                                    </div>
+                                    <input type="range" min="14" max="32" step="2" value={config.fontSize} onChange={(e) => setConfig({...config, fontSize: parseInt(e.target.value)})} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"/>
+                                    <div className="flex justify-between text-xs text-gray-400 mt-1"><span>小</span><span>中</span><span>大</span></div>
                                 </div>
-
-                                {/* 語速設定 */}
                                 <div className="mb-6">
                                     <label className="block text-gray-600 mb-2 font-medium">說話速度</label>
-                                    <input 
-                                        type="range" min="0.5" max="1.0" step="0.1"
-                                        value={config.speechRate}
-                                        onChange={(e) => setConfig({...config, speechRate: parseFloat(e.target.value)})}
-                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-500"
-                                    />
-                                    <div className="flex justify-between text-2xl mt-1">
-                                        <span>🐢</span>
-                                        <span>🐇</span>
-                                    </div>
+                                    <input type="range" min="0.5" max="1.0" step="0.1" value={config.speechRate} onChange={(e) => setConfig({...config, speechRate: parseFloat(e.target.value)})} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-500"/>
+                                    <div className="flex justify-between text-2xl mt-1"><span>🐢</span><span>🐇</span></div>
                                 </div>
-
-                                {/* 音效開關 */}
                                 <div className="flex items-center justify-between">
                                     <span className="text-gray-600 font-medium">語音朗讀</span>
-                                    <button 
-                                        onClick={() => setConfig({...config, soundEnabled: !config.soundEnabled})}
-                                        className={`p-2 rounded-full ${config.soundEnabled ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}
-                                    >
+                                    <button onClick={() => setConfig({...config, soundEnabled: !config.soundEnabled})} className={`p-2 rounded-full ${config.soundEnabled ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                                         {config.soundEnabled ? <Volume2 size={24}/> : <VolumeX size={24}/>}
                                     </button>
                                 </div>
@@ -238,169 +261,262 @@
             );
         };
 
-        // 2.2 歡迎畫面
-        const WelcomeScreen = ({ onStart, userName, setUserName }) => {
+        const QuizModal = ({ question, config, onClose, onAnswer }) => {
+            const [answered, setAnswered] = useState(false);
+            const [attempts, setAttempts] = useState(0);
+            const [selectedOption, setSelectedOption] = useState(null);
+            const [inputValue, setInputValue] = useState(""); // 用於輸入題
+            const [showHint, setShowHint] = useState(false);
+
+            useEffect(() => {
+                speak(question.q, config.speechRate, config.soundEnabled);
+            }, [question]);
+
+            // 選擇題處理
+            const handleOptionClick = (option, index) => {
+                if (answered) return;
+                setSelectedOption(index);
+                if (option.c) {
+                    handleCorrect();
+                } else {
+                    handleWrong();
+                }
+            };
+
+            // 輸入題處理 (數字鍵盤)
+            const handleNumpadInput = (val) => {
+                if (answered) return;
+                if (val === 'del') {
+                    setInputValue(prev => prev.slice(0, -1));
+                } else if (val === 'ok') {
+                    if (inputValue === question.answer) {
+                        handleCorrect();
+                    } else {
+                        handleWrong();
+                        setInputValue(""); // 清空重試
+                    }
+                } else {
+                    if (inputValue.length < 3) setInputValue(prev => prev + val);
+                }
+            };
+
+            const handleCorrect = () => {
+                speak("答對了！" + question.fact, config.speechRate, config.soundEnabled);
+                setAnswered(true);
+                setTimeout(() => {
+                    onAnswer(true, attempts);
+                    onClose();
+                }, 3000);
+            };
+
+            const handleWrong = () => {
+                setAttempts(prev => prev + 1);
+                speak("再試一次，加油！", config.speechRate, config.soundEnabled);
+            };
+
             return (
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center justify-center min-h-screen p-6 text-center"
-                >
-                    <div className="bg-white/60 p-8 rounded-[40px] shadow-xl backdrop-blur-sm max-w-md w-full border-4 border-white">
-                        <div className="mb-6 animate-bounce text-6xl">🥧</div>
-                        <h1 className="text-4xl font-black text-orange-500 mb-2 tracking-tight">香港美食<br/>知多少</h1>
-                        <p className="text-gray-600 mb-8 font-medium">來成為小食神吧！</p>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[30px] p-6 max-w-md w-full shadow-2xl border-4 border-blue-200 flex flex-col items-center">
+                        <div className="text-6xl mb-4 p-4 bg-blue-50 rounded-full">{question.img}</div>
+                        <h2 className="text-xl font-bold text-gray-800 text-center mb-6">{question.q} <button onClick={() => speak(question.q, config.speechRate, true)} className="inline-block ml-2 text-blue-500 align-middle"><Volume2 size={24} /></button></h2>
                         
-                        <div className="space-y-4">
-                            <input 
-                                type="text" 
-                                placeholder="請輸入你的名字 (例如: 小明)"
-                                value={userName}
-                                onChange={(e) => setUserName(e.target.value)}
-                                className="w-full p-4 rounded-2xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none text-center text-xl bg-white/80"
-                            />
-                            
-                            <div className="grid grid-cols-1 gap-3">
-                                <button onClick={() => onStart('beginner')} className="bg-green-400 hover:bg-green-500 text-white font-bold py-4 rounded-2xl shadow-md transition transform hover:-translate-y-1">
-                                    🟢 初階 (看圖猜猜)
-                                </button>
-                                <button onClick={() => onStart('intermediate')} className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-4 rounded-2xl shadow-md transition transform hover:-translate-y-1">
-                                    🟡 中階 (動腦筋)
-                                </button>
-                                <button onClick={() => onStart('advanced')} className="bg-red-400 hover:bg-red-500 text-white font-bold py-4 rounded-2xl shadow-md transition transform hover:-translate-y-1">
-                                    🔴 高階 (生活禮儀)
-                                </button>
+                        {/* 區分：輸入題 vs 選擇題 */}
+                        {question.type === 'input' ? (
+                            <div className="w-full mb-4">
+                                {/* 顯示輸入框 */}
+                                <div className="w-full p-4 bg-gray-100 rounded-xl text-center text-3xl font-bold tracking-widest mb-4 border-2 border-blue-200 h-16 flex items-center justify-center">
+                                    {inputValue || <span className="text-gray-300">?</span>}
+                                </div>
+                                {/* 虛擬數字鍵盤 */}
+                                {!answered && (
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {[1,2,3,4,5,6,7,8,9].map(n => (
+                                            <button key={n} onClick={() => handleNumpadInput(n.toString())} className="p-3 bg-white border-b-4 border-gray-200 rounded-lg font-bold text-xl active:scale-95 hover:bg-gray-50">{n}</button>
+                                        ))}
+                                        <button onClick={() => handleNumpadInput('del')} className="p-3 bg-red-100 text-red-500 border-b-4 border-red-200 rounded-lg font-bold active:scale-95 flex justify-center items-center"><Eraser size={20}/></button>
+                                        <button onClick={() => handleNumpadInput('0')} className="p-3 bg-white border-b-4 border-gray-200 rounded-lg font-bold text-xl active:scale-95 hover:bg-gray-50">0</button>
+                                        <button onClick={() => handleNumpadInput('ok')} className="p-3 bg-green-500 text-white border-b-4 border-green-600 rounded-lg font-bold text-xl active:scale-95 shadow-md">OK</button>
+                                    </div>
+                                )}
+                                {answered && <div className="text-center text-green-600 font-bold text-2xl mt-4 animate-bounce">✅ 正確答案：{question.answer}</div>}
                             </div>
-                        </div>
-                    </div>
-                </motion.div>
+                        ) : (
+                            // 選擇題 UI
+                            <div className="w-full space-y-3 mb-4">
+                                {question.options.map((opt, idx) => (
+                                    <button key={idx} onClick={() => handleOptionClick(opt, idx)} disabled={answered} className={`w-full p-4 rounded-xl text-lg font-bold transition-all flex items-center justify-between border-2 ${answered && opt.c ? 'bg-green-100 border-green-400 text-green-800' : ''} ${selectedOption === idx && !opt.c && !answered ? 'bg-red-50 border-red-200 text-red-800' : 'bg-gray-50 border-gray-100 hover:bg-blue-50'}`}>
+                                        <span>{opt.t}</span>
+                                        {answered && opt.c && <CheckCircle className="text-green-500" />}
+                                        {selectedOption === idx && !opt.c && !answered && <XCircle className="text-red-400" />}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {answered ? (
+                            <motion.div initial={{y:10, opacity:0}} animate={{y:0, opacity:1}} className="bg-green-50 p-4 rounded-xl w-full text-green-800 text-sm"><span className="font-bold">💡 知識小百科：</span> {question.fact}</motion.div>
+                        ) : (
+                            <div className="w-full flex justify-between items-center mt-2">
+                                <button onClick={() => {setShowHint(true); setAttempts(prev => prev+1);}} className="text-gray-400 text-sm flex items-center gap-1 hover:text-orange-500"><Lightbulb size={16} /> 我需要提示</button>
+                                {showHint && <span className="text-orange-500 text-sm animate-pulse">{question.hint}</span>}
+                            </div>
+                        )}
+                    </motion.div>
+                </div>
             );
         };
 
-        // 2.3 遊戲主邏輯 (Match-3 + Quiz Trigger)
-        const GameArea = ({ level, config, onGameOver, updateScore }) => {
+        // --- 3. 核心遊戲區 (GameArea) ---
+        
+        const GameArea = ({ level, subject, config, onGameOver, updateScore }) => {
             const [grid, setGrid] = useState([]);
-            const [selected, setSelected] = useState(null);
-            const [isQuizOpen, setIsQuizOpen] = useState(false);
-            const [currentQuestion, setCurrentQuestion] = useState(null);
-            const [movesLeft, setMovesLeft] = useState(15); // 每個回合15步
-            const [feedback, setFeedback] = useState(null); // 'match' or 'swap'
+            const [selected, setSelected] = useState(null); 
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [movesLeft, setMovesLeft] = useState(15);
+            const [quizData, setQuizData] = useState(null); 
             
-            // 初始化網格 (6x6)
             useEffect(() => {
-                const newGrid = [];
-                for(let i=0; i<6; i++) {
-                    const row = [];
-                    for(let j=0; j<6; j++) {
-                        row.push(FOOD_EMOJIS[Math.floor(Math.random() * FOOD_EMOJIS.length)]);
-                    }
-                    newGrid.push(row);
-                }
-                setGrid(newGrid);
+                setGrid(generateGrid());
             }, []);
 
-            // 處理點擊與交換
-            const handleCellClick = (r, c) => {
-                if (isQuizOpen) return;
-                
-                if (!selected) {
-                    setSelected({r, c});
-                    speak(grid[r][c], config.speechRate, config.soundEnabled); // 讀出點選的食物
-                } else {
-                    // 檢查是否相鄰
-                    const isAdjacent = Math.abs(selected.r - r) + Math.abs(selected.c - c) === 1;
-                    
-                    if (isAdjacent) {
-                        // 交換
-                        const newGrid = [...grid];
-                        const temp = newGrid[selected.r][selected.c];
-                        newGrid[selected.r][selected.c] = newGrid[r][c];
-                        newGrid[r][c] = temp;
-                        setGrid(newGrid);
-                        setSelected(null);
-                        setMovesLeft(prev => prev - 1);
+            useEffect(() => {
+                if (!grid.length) return;
+                if (quizData) return;
 
-                        // 檢查消除
-                        checkMatch(newGrid, r, c);
-                    } else {
-                        setSelected({r, c}); // 更改選擇
+                const matches = findMatches(grid);
+                
+                if (matches.size > 0) {
+                    setIsProcessing(true);
+                    setTimeout(() => {
+                        const newGrid = grid.map(row => [...row]);
+                        const colsToUpdate = new Set();
+                        
+                        matches.forEach(key => {
+                            const [r, c] = key.split(',').map(Number);
+                            if(newGrid[r][c]) {
+                                newGrid[r][c] = null;
+                                colsToUpdate.add(c);
+                            }
+                        });
+
+                        for (let c = 0; c < COLS; c++) {
+                            let emptyCount = 0;
+                            for (let r = ROWS - 1; r >= 0; r--) {
+                                if (newGrid[r][c] === null) {
+                                    emptyCount++;
+                                } else if (emptyCount > 0) {
+                                    newGrid[r + emptyCount][c] = newGrid[r][c];
+                                    newGrid[r][c] = null;
+                                }
+                            }
+                            for (let r = 0; r < emptyCount; r++) {
+                                newGrid[r][c] = createItem(FOOD_TYPES[Math.floor(Math.random() * FOOD_TYPES.length)]);
+                            }
+                        }
+
+                        setGrid(newGrid);
+                    }, 600); 
+                } else {
+                    setIsProcessing(false);
+                    if (movesLeft <= 0 && !isProcessing) {
+                        onGameOver();
                     }
                 }
-            };
+            }, [grid, quizData]); 
 
-            // 簡單的消除檢查邏輯
-            const checkMatch = (currentGrid, r, c) => {
-                // 這裡簡化邏輯：只要交換後有任意 3 連線 (橫或直)
-                // 為了展示效果，我們假設每次有效交換都有 30% 機率觸發消除並進入問答
-                // 在真實遊戲中這裡需要完整的 BFS/DFS 算法
-                
-                const isLuckyMatch = Math.random() > 0.3; // 模擬消除成功率
+            const handleSwap = async (r1, c1, r2, c2) => {
+                setIsProcessing(true);
+                const tempGrid = grid.map(row => [...row]);
+                const temp = tempGrid[r1][c1];
+                tempGrid[r1][c1] = tempGrid[r2][c2];
+                tempGrid[r2][c2] = temp;
+                setGrid(tempGrid);
 
-                if (isLuckyMatch) {
-                    setTimeout(() => {
-                        // 播放消除音效或視覺
-                        setFeedback('match');
-                        // 觸發問答
-                        triggerQuiz();
-                        // 消除後補滿 (模擬)
-                        const newGrid = [...currentGrid];
-                        newGrid[r][c] = FOOD_EMOJIS[Math.floor(Math.random() * FOOD_EMOJIS.length)];
-                        setGrid(newGrid);
-                    }, 500);
-                } else if (movesLeft <= 1) {
-                    onGameOver();
+                await new Promise(res => setTimeout(res, 300));
+                const matches = findMatches(tempGrid);
+
+                if (matches.size > 0) {
+                    setMovesLeft(prev => prev - 1);
+                    // 觸發問答：根據科目和難度
+                    let q;
+                    if (subject === 'math') {
+                        q = generateMathQuestion(level);
+                    } else {
+                        // 人文科 (美食)
+                        const pool = FOOD_QUESTIONS[level] || FOOD_QUESTIONS['beginner'];
+                        q = pool[Math.floor(Math.random() * pool.length)];
+                    }
+                    setQuizData(q);
+                    
+                } else {
+                    const revertGrid = tempGrid.map(row => [...row]);
+                    const temp2 = revertGrid[r1][c1];
+                    revertGrid[r1][c1] = revertGrid[r2][c2];
+                    revertGrid[r2][c2] = temp2;
+                    setGrid(revertGrid); 
+                    setIsProcessing(false);
+                    speak("哎呀，這裡不能消除喔", config.speechRate, config.soundEnabled);
                 }
+                setSelected(null);
             };
 
-            const triggerQuiz = () => {
-                // 從對應等級題庫隨機選題
-                const pool = QUESTION_DB[level];
-                const q = pool[Math.floor(Math.random() * pool.length)];
-                setCurrentQuestion(q);
-                setIsQuizOpen(true);
+            const handleCellClick = (r, c) => {
+                if (isProcessing || quizData) return;
+                if (!selected) {
+                    setSelected({r, c});
+                    speak(grid[r][c].type, config.speechRate, config.soundEnabled);
+                } else {
+                    const isAdjacent = Math.abs(selected.r - r) + Math.abs(selected.c - c) === 1;
+                    if (isAdjacent) {
+                        handleSwap(selected.r, selected.c, r, c);
+                    } else {
+                        if (selected.r === r && selected.c === c) {
+                            setSelected(null);
+                        } else {
+                            setSelected({r, c});
+                            speak(grid[r][c].type, config.speechRate, config.soundEnabled);
+                        }
+                    }
+                }
             };
 
             return (
-                <div className="flex flex-col items-center w-full h-full">
-                    {/* HUD */}
-                    <div className="flex justify-between w-full max-w-md mb-4 px-4">
-                        <div className="bg-white/80 rounded-full px-4 py-2 font-bold text-orange-600 shadow-sm border border-orange-100 flex items-center gap-2">
+                <div className="flex flex-col items-center w-full h-full relative">
+                    <div className="flex justify-between w-full max-w-md mb-4 px-4 z-10">
+                        <div className="bg-white/90 rounded-full px-4 py-2 font-bold text-orange-600 shadow-sm border border-orange-100 flex items-center gap-2">
                             <span>👣 步數: {movesLeft}</span>
                         </div>
+                        <button onClick={() => setGrid(generateGrid())} className="bg-white/90 p-2 rounded-full text-blue-500 shadow-sm"><Shuffle size={20}/></button>
                     </div>
 
-                    {/* Grid */}
-                    <div className={`grid grid-cols-6 gap-2 p-3 bg-orange-100/50 rounded-3xl backdrop-blur-sm border-4 border-orange-200 transition-all duration-500 ${isQuizOpen ? 'blur-md brightness-75 pointer-events-none' : ''}`}>
+                    <div className="grid grid-cols-6 gap-1 sm:gap-2 p-2 sm:p-3 bg-orange-100/60 rounded-3xl backdrop-blur-sm border-4 border-orange-200 select-none touch-none"
+                        style={{ width: 'min(95vw, 500px)', height: 'min(95vw, 500px)' }}>
                         {grid.map((row, r) => (
                             row.map((cell, c) => (
-                                <motion.button
-                                    key={`${r}-${c}`}
-                                    whileTap={{ scale: 0.8 }}
+                                <motion.div
+                                    key={cell ? cell.id : `empty-${r}-${c}`}
+                                    layout
+                                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
                                     onClick={() => handleCellClick(r, c)}
                                     className={`
-                                        w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center text-2xl sm:text-4xl rounded-xl shadow-sm border-b-4 transition-all
+                                        w-full h-full flex items-center justify-center text-3xl sm:text-4xl rounded-xl sm:rounded-2xl shadow-sm border-b-4 cursor-pointer relative
                                         ${selected?.r === r && selected?.c === c 
-                                            ? 'bg-yellow-200 border-yellow-400 scale-110 z-10 ring-4 ring-yellow-300' 
+                                            ? 'bg-yellow-200 border-yellow-400 z-10 ring-4 ring-yellow-300 scale-105' 
                                             : 'bg-white border-gray-200 hover:bg-gray-50'}
-                                    `}
-                                >
-                                    {cell}
-                                </motion.button>
+                                    `}>
+                                    {cell ? cell.type : ''}
+                                </motion.div>
                             ))
                         ))}
                     </div>
 
-                    {/* Quiz Modal */}
                     <AnimatePresence>
-                        {isQuizOpen && currentQuestion && (
+                        {quizData && (
                             <QuizModal 
-                                question={currentQuestion} 
+                                question={quizData} 
                                 config={config}
-                                onClose={() => setIsQuizOpen(false)}
-                                onAnswer={(isCorrect, attempts) => {
-                                    updateScore(isCorrect, attempts);
-                                    if (movesLeft <= 0) onGameOver();
-                                }}
+                                onClose={() => setQuizData(null)}
+                                onAnswer={(isCorrect, attempts) => updateScore(isCorrect, attempts)}
                             />
                         )}
                     </AnimatePresence>
@@ -408,114 +524,13 @@
             );
         };
 
-        // 2.4 問答彈窗 (核心教育模組)
-        const QuizModal = ({ question, config, onClose, onAnswer }) => {
-            const [answered, setAnswered] = useState(false);
-            const [attempts, setAttempts] = useState(0);
-            const [selectedOption, setSelectedOption] = useState(null);
-            const [showHint, setShowHint] = useState(false);
-
-            useEffect(() => {
-                speak(question.q, config.speechRate, config.soundEnabled);
-            }, [question]);
-
-            const handleOptionClick = (option, index) => {
-                if (answered) return;
-                
-                setSelectedOption(index);
-                
-                if (option.c) {
-                    // Correct
-                    speak("答對了！" + question.fact, config.speechRate, config.soundEnabled);
-                    setAnswered(true);
-                    setTimeout(() => {
-                        onAnswer(true, attempts);
-                        onClose();
-                    }, 3000);
-                } else {
-                    // Wrong
-                    setAttempts(prev => prev + 1);
-                    speak("再試一次，加油！", config.speechRate, config.soundEnabled);
-                    // 錯誤選項震動效果
-                }
-            };
-
-            return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <motion.div 
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.5, opacity: 0 }}
-                        className="bg-white rounded-[30px] p-6 max-w-md w-full shadow-2xl border-4 border-blue-100 flex flex-col items-center relative"
-                    >
-                        {/* 標題與圖片 */}
-                        <div className="text-6xl mb-4 p-4 bg-blue-50 rounded-full">{question.img}</div>
-                        
-                        <h2 className="text-xl font-bold text-gray-800 text-center mb-6 leading-relaxed">
-                            {question.q}
-                            <button onClick={() => speak(question.q, config.speechRate, true)} className="inline-block ml-2 text-blue-500 align-middle">
-                                <Volume2 size={24} />
-                            </button>
-                        </h2>
-
-                        {/* 選項區 */}
-                        <div className="w-full space-y-3 mb-4">
-                            {question.options.map((opt, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => handleOptionClick(opt, idx)}
-                                    disabled={answered}
-                                    className={`
-                                        w-full p-4 rounded-xl text-lg font-bold transition-all flex items-center justify-between border-2
-                                        ${answered && opt.c ? 'bg-green-100 border-green-400 text-green-800' : ''}
-                                        ${selectedOption === idx && !opt.c && !answered ? 'bg-red-50 border-red-200 text-red-800' : 'bg-gray-50 border-gray-100 hover:bg-blue-50 hover:border-blue-200'}
-                                    `}
-                                >
-                                    <span>{opt.t}</span>
-                                    {answered && opt.c && <CheckCircle className="text-green-500" />}
-                                    {selectedOption === idx && !opt.c && !answered && <XCircle className="text-red-400" />}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* 提示與回饋 */}
-                        {answered ? (
-                            <motion.div initial={{y:10, opacity:0}} animate={{y:0, opacity:1}} className="bg-green-50 p-4 rounded-xl w-full text-green-800 text-sm">
-                                <span className="font-bold">💡 知識小百科：</span> {question.fact}
-                            </motion.div>
-                        ) : (
-                            <div className="w-full flex justify-between items-center">
-                                <button 
-                                    onClick={() => {setShowHint(true); setAttempts(prev => prev+1);}}
-                                    className="text-gray-400 text-sm flex items-center gap-1 hover:text-orange-500"
-                                >
-                                    <Lightbulb size={16} /> 我需要提示
-                                </button>
-                                {showHint && <span className="text-orange-500 text-sm animate-pulse">{question.hint}</span>}
-                            </div>
-                        )}
-                        
-                    </motion.div>
-                </div>
-            );
-        };
-
-        // 2.5 結算報告
         const ReportScreen = ({ score, effort, onRestart, onHome }) => {
             const totalScore = score + effort;
-            const percentage = Math.min(100, Math.round((score / (score + effort * 0.5)) * 100)) || 100;
-
             return (
-                <motion.div 
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }}
-                    className="flex flex-col items-center justify-center min-h-screen p-6"
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center min-h-screen p-6">
                     <div className="bg-white/90 p-8 rounded-[40px] shadow-2xl max-w-md w-full text-center border-4 border-yellow-200">
                         <Trophy size={64} className="mx-auto text-yellow-500 mb-4" />
-                        <h2 className="text-3xl font-black text-gray-800 mb-2">好味大挑戰完成！</h2>
-                        <p className="text-gray-500 mb-6">你真是一個小小美食家！</p>
-
+                        <h2 className="text-3xl font-black text-gray-800 mb-2">挑戰完成！</h2>
                         <div className="space-y-4 mb-8">
                             <div className="bg-blue-50 p-4 rounded-2xl flex justify-between items-center">
                                 <span className="font-bold text-blue-800 flex items-center gap-2"><Brain size={20}/> 知識得分</span>
@@ -526,149 +541,132 @@
                                 <span className="text-2xl font-black text-orange-600">{effort}</span>
                             </div>
                             <div className="border-t-2 border-dashed border-gray-300 pt-4 mt-2">
-                                <div className="flex justify-between items-end">
-                                    <span className="text-gray-600 font-bold text-lg">總成就分</span>
-                                    <span className="text-4xl font-black text-purple-600">{totalScore}</span>
-                                </div>
+                                <div className="flex justify-between items-end"><span className="text-gray-600 font-bold text-lg">總成就分</span><span className="text-4xl font-black text-purple-600">{totalScore}</span></div>
                             </div>
                         </div>
-
-                        <div className="bg-gray-100 p-4 rounded-xl mb-6 text-left">
-                            <h4 className="font-bold text-gray-700 mb-2">🌟 老師給你的建議：</h4>
-                            <p className="text-gray-600 text-sm leading-relaxed">
-                                {percentage > 80 ? "太厲害了！你對香港美食非常了解，下次試試看挑戰「高階」題目吧！" : 
-                                 percentage > 50 ? "做得很好！繼續保持好奇心，多觀察身邊的食物故事。" : 
-                                 "沒關係，多玩幾次你會認識更多好吃的東西，加油！"}
-                            </p>
-                        </div>
-
                         <div className="flex gap-3">
-                            <button onClick={onHome} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-xl flex justify-center items-center gap-2">
-                                <Home size={20}/> 主選單
-                            </button>
-                            <button onClick={onRestart} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl flex justify-center items-center gap-2">
-                                <RefreshCcw size={20}/> 再玩一次
-                            </button>
+                            <button onClick={onHome} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-xl flex justify-center items-center gap-2"><Home size={20}/> 主選單</button>
+                            <button onClick={onRestart} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl flex justify-center items-center gap-2"><RefreshCcw size={20}/> 再玩一次</button>
                         </div>
                     </div>
                 </motion.div>
             );
         };
 
-        // --- 3. 主應用程式 (App) ---
+        const WelcomeScreen = ({ onStart, userName, setUserName }) => {
+            const [step, setStep] = useState(1); // 1: Name, 2: Subject, 3: Level
+            const [selectedSubject, setSelectedSubject] = useState(null);
+
+            const handleNameSubmit = () => {
+                if(userName.trim()) setStep(2);
+                else alert("請先輸入名字喔！");
+            };
+
+            const handleSubjectSelect = (subId) => {
+                setSelectedSubject(subId);
+                setStep(3);
+            };
+
+            return (
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
+                    <div className="bg-white/60 p-8 rounded-[40px] shadow-xl backdrop-blur-sm max-w-md w-full border-4 border-white relative">
+                        {step > 1 && (
+                            <button onClick={() => setStep(step-1)} className="absolute top-4 left-4 p-2 bg-white rounded-full shadow-sm text-gray-500">
+                                <ArrowRight className="rotate-180" size={20}/>
+                            </button>
+                        )}
+
+                        <div className="mb-6 animate-bounce text-6xl">🎓</div>
+                        <h1 className="text-4xl font-black text-orange-500 mb-2 tracking-tight">香港小學堂</h1>
+                        <p className="text-gray-600 mb-8 font-medium">快樂學習，天天向上！</p>
+                        
+                        {step === 1 && (
+                            <div className="space-y-4">
+                                <input type="text" placeholder="請輸入你的名字" value={userName} onChange={(e) => setUserName(e.target.value)} className="w-full p-4 rounded-2xl border-2 border-orange-200 focus:border-orange-400 focus:outline-none text-center text-xl bg-white/80"/>
+                                <button onClick={handleNameSubmit} className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-4 rounded-2xl shadow-md transition transform hover:-translate-y-1 text-xl">
+                                    下一步 ➡️
+                                </button>
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-bold text-gray-700 mb-4">你想學習哪一科？</h3>
+                                {SUBJECTS.map(sub => (
+                                    <button key={sub.id} onClick={() => handleSubjectSelect(sub.id)} className={`w-full ${sub.color} hover:brightness-110 text-white font-bold py-6 rounded-2xl shadow-md transition transform hover:-translate-y-1 flex items-center justify-center gap-4 text-xl`}>
+                                        {sub.icon} {sub.name}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {step === 3 && (
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-bold text-gray-700 mb-4">選擇挑戰難度</h3>
+                                <button onClick={() => onStart(selectedSubject, 'beginner')} className="w-full bg-green-400 hover:bg-green-500 text-white font-bold py-4 rounded-2xl shadow-md transition transform hover:-translate-y-1">
+                                    🟢 初階 (選擇題)
+                                </button>
+                                {/* 數學科的中階我們暫時隱藏或設為與初階相同邏輯但數字不同，這裡為了簡化依使用者需求只分選擇與輸入 */}
+                                {selectedSubject === 'humanities' && (
+                                    <button onClick={() => onStart(selectedSubject, 'intermediate')} className="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-4 rounded-2xl shadow-md transition transform hover:-translate-y-1">
+                                        🟡 中階 (動腦筋)
+                                    </button>
+                                )}
+                                <button onClick={() => onStart(selectedSubject, 'advanced')} className="w-full bg-red-400 hover:bg-red-500 text-white font-bold py-4 rounded-2xl shadow-md transition transform hover:-translate-y-1">
+                                    🔴 高階 ({selectedSubject === 'math' ? '輸入答案' : '生活禮儀'})
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </motion.div>
+            );
+        };
+
         const App = () => {
-            const [gameState, setGameState] = useState('welcome'); // welcome, playing, report
+            const [gameState, setGameState] = useState('welcome');
             const [userName, setUserName] = useState('');
             const [level, setLevel] = useState('beginner');
-            const [score, setScore] = useState(0); // 答對分
-            const [effort, setEffort] = useState(0); // 嘗試分
-            
-            // 偏好設定 State
+            const [subject, setSubject] = useState('humanities');
+            const [score, setScore] = useState(0);
+            const [effort, setEffort] = useState(0);
             const [isPrefOpen, setIsPrefOpen] = useState(false);
-            const [config, setConfig] = useState({
-                fontSize: 18,
-                speechRate: 0.8,
-                soundEnabled: true
-            });
+            const [config, setConfig] = useState({ fontSize: 18, speechRate: 0.8, soundEnabled: true });
 
-            // 更新 Root 字體大小以實現響應式縮放
-            useEffect(() => {
-                document.documentElement.style.fontSize = `${config.fontSize}px`;
-            }, [config.fontSize]);
+            useEffect(() => { document.documentElement.style.fontSize = `${config.fontSize}px`; }, [config.fontSize]);
 
-            const startGame = (selectedLevel) => {
-                if(!userName.trim()) {
-                    alert("請先輸入你的名字喔！");
-                    return;
-                }
-                setLevel(selectedLevel);
-                setScore(0);
-                setEffort(0);
-                setGameState('playing');
-                speak(`你好${userName}，我們開始遊戲吧！`, config.speechRate, config.soundEnabled);
+            const startGame = (sub, lvl) => {
+                setSubject(sub);
+                setLevel(lvl); 
+                setScore(0); setEffort(0); setGameState('playing');
+                const subName = sub === 'math' ? '數學課' : '常識課';
+                speak(`你好${userName}，歡迎來到${subName}，我們開始遊戲吧！`, config.speechRate, config.soundEnabled);
             };
 
             const handleScoreUpdate = (isCorrect, attempts) => {
-                if(isCorrect) {
-                    setScore(prev => prev + 10);
-                    // 每次錯誤都給予 1 分努力分，鼓勵嘗試
-                    setEffort(prev => prev + attempts);
-                }
+                if(isCorrect) { setScore(p => p + 10); setEffort(p => p + attempts); }
             };
 
             return (
                 <div className="min-h-screen relative overflow-hidden select-none">
-                    {/* 背景裝飾 */}
                     <div className="fixed top-0 left-0 w-full h-full -z-10 opacity-30 pointer-events-none">
                         <div className="absolute top-10 left-10 w-32 h-32 bg-yellow-300 rounded-full blur-3xl mix-blend-multiply animate-pulse"></div>
                         <div className="absolute bottom-10 right-10 w-48 h-48 bg-pink-300 rounded-full blur-3xl mix-blend-multiply animate-pulse" style={{animationDelay: '1s'}}></div>
                     </div>
-
-                    {/* 頂部導航 (遊戲中顯示) */}
                     {gameState === 'playing' && (
                         <nav className="fixed top-0 w-full p-4 flex justify-between items-center z-40 bg-white/50 backdrop-blur-md">
-                            <button onClick={() => setGameState('welcome')} className="bg-white p-2 rounded-xl shadow-sm text-gray-600 flex items-center gap-2 text-sm font-bold border border-gray-200">
-                                <ArrowRight className="rotate-180" size={18} /> 返回
-                            </button>
-                            <div className="flex items-center gap-4">
-                                <div className="flex flex-col items-end">
-                                    <span className="text-xs text-gray-500 font-bold">{userName}</span>
-                                    <span className="text-lg font-black text-orange-500 flex items-center gap-1">
-                                        <Star size={18} fill="currentColor"/> {score + effort}
-                                    </span>
-                                </div>
-                            </div>
+                            <button onClick={() => setGameState('welcome')} className="bg-white p-2 rounded-xl shadow-sm text-gray-600 flex items-center gap-2 text-sm font-bold border border-gray-200"><ArrowRight className="rotate-180" size={18} /> 返回</button>
+                            <div className="flex items-center gap-4"><div className="flex flex-col items-end"><span className="text-xs text-gray-500 font-bold">{userName}</span><span className="text-lg font-black text-orange-500 flex items-center gap-1"><Star size={18} fill="currentColor"/> {score + effort}</span></div></div>
                         </nav>
                     )}
-
-                    {/* 設定按鈕 */}
-                    <Preferences 
-                        config={config} 
-                        setConfig={setConfig} 
-                        isOpen={isPrefOpen} 
-                        setIsOpen={setIsPrefOpen} 
-                    />
-
-                    {/* 主要內容區 */}
+                    <Preferences config={config} setConfig={setConfig} isOpen={isPrefOpen} setIsOpen={setIsPrefOpen} />
                     <main className="pt-16 pb-20 w-full h-full flex flex-col items-center">
-                        {gameState === 'welcome' && (
-                            <WelcomeScreen 
-                                onStart={startGame} 
-                                userName={userName} 
-                                setUserName={setUserName} 
-                            />
-                        )}
-                        
-                        {gameState === 'playing' && (
-                            <GameArea 
-                                level={level} 
-                                config={config}
-                                updateScore={handleScoreUpdate}
-                                onGameOver={() => setGameState('report')}
-                            />
-                        )}
-
-                        {gameState === 'report' && (
-                            <ReportScreen 
-                                score={score} 
-                                effort={effort} 
-                                onRestart={() => startGame(level)}
-                                onHome={() => setGameState('welcome')}
-                            />
-                        )}
+                        {gameState === 'welcome' && <WelcomeScreen onStart={startGame} userName={userName} setUserName={setUserName} />}
+                        {gameState === 'playing' && <GameArea level={level} subject={subject} config={config} updateScore={handleScoreUpdate} onGameOver={() => setGameState('report')} />}
+                        {gameState === 'report' && <ReportScreen score={score} effort={effort} onRestart={() => startGame(subject, level)} onHome={() => setGameState('welcome')} />}
                     </main>
-
-                    {/* Footer */}
-                    <footer className="fixed bottom-0 w-full text-center py-2 text-gray-400 text-[10px] bg-white/30 backdrop-blur-sm z-30">
-                        ©2025 WMC - 專為學習設計
-                    </footer>
-
-                    {/* FAB 懸浮標籤 */}
+                    <footer className="fixed bottom-0 w-full text-center py-2 text-gray-400 text-[10px] bg-white/30 backdrop-blur-sm z-30">©2025 WMC - 專為學習設計</footer>
                     <div className="fixed bottom-6 right-6 z-50">
-                        <div className="holographic-btn px-4 py-2 rounded-full flex items-center gap-2 text-white font-bold text-xs tracking-wider cursor-pointer transform hover:scale-105 transition-all">
-                            <Monitor size={14} />
-                            <span>WMC 程棨彥 設計</span>
-                        </div>
+                        <div className="holographic-btn px-4 py-2 rounded-full flex items-center gap-2 text-white font-bold text-xs tracking-wider cursor-pointer transform hover:scale-105 transition-all"><Monitor size={14} /><span>WMC 程棨彥 設計</span></div>
                     </div>
                 </div>
             );
@@ -676,11 +674,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
-    
-    <!-- Lucide Icon Initialization (Not strictly needed since we use manual react mapping now, but kept for compatibility) -->
-    <script>
-        // lucide.createIcons(); 
     </script>
 </body>
 </html>
